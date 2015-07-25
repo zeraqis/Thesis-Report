@@ -12,6 +12,8 @@
 \usepackage{wasysym}
 \usepackage{subcaption}
 \usepackage{multirow}
+\usepackage{caption}
+\usepackage{subcaption}
 % 3)
 
 
@@ -32,6 +34,7 @@
 %% Include an optional title page.
 \input{title}
 
+\input{abstract}
 \input{preface}
 
 \tableofcontents
@@ -39,12 +42,13 @@
 %% Use Arabic numerals for the page numbers of the chapters.
 \mainmatter
 
-\input{chapter-1}
-\input{chapter-2}
-\input{chapter-3}
-\input{chapter-4}
-\input{chapter-5}
-\input{chapter-6}
+\input{chapter-intro}
+\input{chapter-back}
+\input{chapter-data}
+\input{chapter-inv}
+\input{chapter-method}
+\input{chapter-eval}
+\input{chapter-concl}
 
 %% Use letters for the chapter numbers of the appendices.
 %\appendix
