@@ -1,4 +1,5 @@
 \chapter{Introduction}
+\label{chap:intro}
 Everyone has probably had the experience of walking into a restaurant which has a menu that makes no sense and not knowing what to expect would then ask the waiter to recommend some quality dishes that are native to the restaurant. The waiter would then go on to list some of the specialities of the restaurant, some favorites of other customers and to some extent also explain the  meat or flavoring that the dish comprises of. Finally, the customer would then make a decision on what would be appropriate to his own tastes.
 
 Recommender systems are no less different from the waiter of that unfamiliar restaurant. They strive to satisfy the user's needs by providing a quality experience taking his own tastes and interests into account. The core aspect of a recommender is to not pose a user with too much information but only give him what he desires. Recommender systems heavily rely upon user feedback as a form of learning user behaviour and interests. Conventional recommender systems make use of explicit user ratings on items and where ratings are not available, they make use of clicks. For further personalization, clicks are often enriched with meta-data regarding the item, for instance tags. In addition, many web applications do not make use of an explicit `dislike' button as this is often conceived as offending the original author of the item. While there exists a `like' button which in most cases implicates a good recommendation was received, there is no direct way to capture the opposite.
@@ -34,5 +35,12 @@ Over the course of our work, we will answer the following research questions. Fi
 \caption{Domain Specific}
 \label{fig:r_questions_misc}
 \end{figure}
+
+\section{Related Work (draft)}
+Comments have long been under the radar of research, some notable works include the very detailed study of weblog comments by Mishne and Glance \cite{mishne_leave_2006}, summarization of blogs through the comments they receive by Hu et al. \cite{hu_comments-oriented_2008}, popularity prediction of news articles utilizing comments they receive by Tatar et al. \cite{tatar_predicting_2011}, search re-ranking of images through comments by San Pedro et al. \cite{san_pedro_leveraging_2012} and many more. 
+
+In a recommendation scenario, comments are not widely studied. The prominent of the few being recommendation of news stories taking the existence of comments as a form of implicit feedback by Shmueli et al. \cite{shmueli_care_2012} and a more recent work of recommending news stories by also accounting for cold start through the existence of a comment by Saveski and Mantrach \cite{saveski_item_2014}.
+
+So, a clear pattern is observed here, the content of comments have been extensively studied for various information retrieval tasks but have not been employed in a recommendation scenario. In a recommendation scenario, it is only viewed as a form of feedback and only the existence of the comment is only ever taken into consideration. The novelty of our work therein lies to also exploit the content of comments as a means for personalized recommendations.
 
 \section{Thesis Organization? (TODO)}

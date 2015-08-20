@@ -1,168 +1,228 @@
 \chapter{Investigations}
-We perform preliminary investigations into assessing the datasets for later formulating the appropriate methodology that would best suit their innate properties.
+\label{chap:inv}
+We perform preliminary investigations into assessing the dataset for later formulating the appropriate methodology that would best suit their innate properties.
 
 \section{Attribution of Comments}
- We seek an understanding of the strength of the association between comments and their authors, which is the first step towards our ultimate goal of comment-based models of author similarities.
+We seek an understanding of the strength of the association between comments and their authors. This would provide insight into user commenting behaviour, in particular whether a user has a unique vocabulary that distinguishes him from other users.
 
-Authorship attribution aims at predicting the writer of a given a piece of text. In general a variety of stylometric and lexical features are used. Authorship attribution problems generally arise in forensic settings, and involve relatively long documents, and lists of possible authors limited to a few hundred candidate authors. Often, a sizable amount of example text is available for each candidate.
+Authorship attribution aims at predicting the writer of a given a piece of text. In general a variety of stylometric and lexical features are used. Authorship attribution problems generally arise in forensic settings, and involve relatively long documents, and lists of possible authors limited to a few hundred candidate authors. Often, a sizable amount of example text is available for each candidate.In contrast, in our use case, the documents are short, the list of candidate authors is very large, and most are associated with little example text.                                          
 
-In contrast, in our use case, the documents are short, the list of candidate authors is very large, and most are associated with little example text. The contribution of this paper is a first insight into how well commonly adopted authorship attribution techniques play out in a large candidate author set with short and informal text.
-
-We aim to answer the following research questions:  
-\begin{enumerate}
-\item Can we predict an author of a comment from among a large number of candidates?
-\item Which features aid in large-scale authorship attribution?
-\item Are there differences between different communities of commenters (i.e., domains)?
-\end{enumerate}
-
-\subsection{Related Work}
-%Most authorship attribution related research investigate either large documents or a smaller candidate author set or both.
-
+\subsection{Literature}
 Stamatatos provides an excellent summary of existing authorship attribution techniques \cite{stamatatos_survey_2009}. Most of the work discussed make use of both large documents and a smaller candidate author set. Stamatatos also points out that Support Vector Machines (SVM) perform extremely well as a distinguishing methodology in this particular scenario.
 
 More recent work that looks into a smaller documents was done by Layton et al. \cite{layton_authorship_2010}, who look into authorship attribution for Twitter, where a micro-post (i.e., tweet) is restricted to 140 characters. Layton et al. opt for profile based feature representation of documents wherein all documents of a particular user are concatenated to form a super-document. They experiment with character $n$-grams with varying $n$ values and find that $4$-grams provide overall a good mean accuracy.
 
-Work on large-scale attribution was carried out by Narayanan et al. \cite{narayanan_feasibility_2012}, who predict authors from a list of 100,000 candidate authors using a range of classifiers. Their dataset was comprised of blog posts, which are relatively longer than tweets or comments. They employed parts-of-speech tagging and a variety of lexical/character features for their purposes. A very interesting find in their work was that simple classifiers such as Naive Bayes and k-Nearest Neighbour performed better than SVM at the top ranks. 
-%I took out this sentence because it breaks the flow.
-%In addition, they make use of confidence estimation for the ranked list of classified authors rather than directly use the output of the classifier.
+Work on large-scale attribution was carried out by Narayanan et al. \cite{narayanan_feasibility_2012}, who predict authors from a list of 100,000 candidate authors using a range of classifiers. Their dataset was comprised of blog posts, which are relatively longer than tweets or comments. They employed parts-of-speech tagging and a variety of lexical/character features for their purposes. A very interesting find in their work was that simple classifiers such as Naive Bayes and k-Nearest Neighbour performed better than SVM at the top ranks.
 
 Our use case deals with shorter documents, namely comments, and a large candidate author set. We experiment with parts of methodologies adopted by Layton et al. \cite{layton_authorship_2010} and Narayanan et al. \cite{narayanan_feasibility_2012} as our problem is a combination of both. The upcoming sections discuss our methodology and the results of our experiments.
 
-\subsection{Method}
-In our scenario, the training set is highly imbalanced, with a vast majority of authors having made very few comments and a handful of authors who made thousands of comments. For this reason, we adopt instance-based classification, wherein each document contributes on its own to the attribution and choose a simple k-NN classifier.
+\subsection{k-NN Distance Based Attribution}
+In our scenario, the training set is highly imbalanced, with a vast majority of authors having made very few comments and a handful of authors who made thousands of comments. For this reason, we adopt instance-based classification, wherein each document contributes on its own to the attribution and choose a simple 1-NN classifier.
 
-The features we make use of are the frequency counts of character $n$-grams similar to that of Layton et al., since our use case also deals with similar informal text and shorter documents. We experiment with different values of $n$. We expect the value of $n$ to be important, since our data sets are not homogeneously mono-lingual. We perform a basic thresholding by selecting only those $n$-grams that occur more than three times in the entire dataset.
+For a given comment, we predict the nearest most resembling comment in the training set. It is to be noted that we do not make profile based predictions by grouping all comments of a single user together but rather each comment constitutes its own class. The overall framework is illustrated in Figure~\ref{fig:inv_1}.
 
-%so as to eliminate any artifacts that would potentially bring down the performance of the classifier.
-%The problem is that infrequently occurring words do not allow generalization.
-
-The character $n$-gram frequency is converted into a feature vector and fed into the k-NN classifier. For a given unknown comment, the classifier outputs nearest neighbour comments, which are labeled with authors. In essence, our method makes a prediction based on documents using similar vocabulary as our target document.
-
-\subsection{Experiments}
-SC comments are very short whereas NU comments are relatively longer. It also goes without saying both are different domains and cater to different audiences. We performed basic spam filtering for SC by removing all comments that contained the literal `$http$' (naive url filtering) as these would produce $n$-gram artifacts and were possibly created by bots. NU is strictly moderated and the possibility of occurrence of spam is low.
-
-We partition the data temporally: the first 11 months of comments are taken as the training set and the last month as the test set. This partitioning was chosen since we are interested in predicting authorship based on historical data, and in any real world scenario, one can only predict future behaviour based on past instances and not the other way around. We also take into consideration only the candidate authors who had made at-least six comments, since we assume that it is not possible to make predictions with less data. Table~\ref{tab:split} shows the underlying split of data.
-
-\begin{table}[]
+\begin{figure}[!h]
 \centering
-\begin{tabular}{|l|c|c|c|c|}
+\includegraphics[width=1\textwidth]{c-inv_images/inv_1.png}
+\caption{Authorship Attribution}
+\label{fig:inv_1}
+\end{figure}
+
+The features we make use of are the character $n$-grams similar to that of Layton et al., since our use case also deals with similar informal text and shorter documents. We experiment with different values of $n$. We expect the value of $n$ to be important, since our data set is not homogeneously mono-lingual. We perform basic thresholding by selecting only those $n$-grams that occur more than five times in the entire dataset.
+
+The character $n$-grams are converted into \textit{tf-idf} weight vectors, \textit{tf-idf} weights are essentially the product of the term frequency in a single document and the inverse document frequency. It aids in discerning the unique terms in a document thereby would directly expose user-specific features. Tf-idf is generally formulated as,
+
+\begin{align*}
+tfidf &= f_{t,d} * log\frac{N}{n_t}\\
+\text{where, }& f_{t,d} \text{ - frequency of term $t$ in document $d$}\\
+& N \text{ - total documents in corpus}\\
+& n_t \text{ - number of documents with term $t$}
+\end{align*}
+
+Each vector represents a single comment and if a particular $n$-gram is not present then the corresponding \textit{tf-idf} entry is zero in that index. We experiment with two different distance functions as a means for finding their nearest neighbours. Namely, euclidean distance similar to what Narayanan et al. \cite{narayanan_feasibility_2012} used and cosine similarity. If $p_i$ and $q_i$ are two vectors then we formulate,
+
+\begin{align*}
+\text{Eucildean Distance} &= ||(q-p)||\\
+\text{Cosine Similarity} &= \frac{p.q}{||p||*||q||}\\
+\text{where, }||x|| &= \sqrt{x_1^2 + x_2^2 + x_3^ + ... + x_n^2} \text{ is the norm of the vector }x\\
+\end{align*}
+
+Euclidean distance directly measures the magnitude of the distance between the two vectors whereas cosine similarity measures the directional difference between the two vectors. 
+
+\subsection{Attribution Experiments}
+NU.nl comments are strictly moderated and the possibility of occurrence of spam is low, therefore we take the comments in their original form for $n$-gram tokenization without any form of filtering. The entire dataset encompasses over the last three months of 2014 as previously discussed in Chapter~\ref{chap:data}.
+
+We partition the data temporally: the first 10 days of comments are taken as the training set and the next 3 days as the test set, we slide this 10-3 day split over the entire dataset, resulting in total of 79 samples of the data. Figure~\ref{fig:inv_2} better represents the sampling strategy.
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=1\textwidth]{c-inv_images/inv_2.png}
+\caption{Sampling}
+\label{fig:inv_2}
+\end{figure}
+
+This strategy was chosen since we are interested in predicting authorship based on historical data, and in any real world scenario, one can only predict future behaviour based on past instances and not the other way around. 
+
+We also take into consideration only the candidate authors who had made at-least three comments, since we assume that it is not possible to make predictions with less data. Table~\ref{tab:split} shows the underlying split of the data averaged over all the samples.
+
+\begin{table}[!h]
+\centering
+\begin{tabular}{|c|c|c|c|}
 \hline
- \textbf{Dataset} & \textbf{Train/Test} & \textbf{No. of Users} & \textbf{No. of Comments} & \textbf{Avg. Comment Length} \\ \hline
- \multirow{2}{*} {SC} &  Train & 15,665 & 558,909 & 47.35 chars\\ \cline{2-5}
- & Test & 15,665 & 152,335 & 44.61 chars\\ \hline
- \multirow{2}{*}{NU} & Train & 11,958 & 1,067,451 & 245.11 chars\\ \cline{2-5}
- & Test & 11,958 & 175,433 & 233.48 chars\\ \hline
+ \textbf{Train/Test} & \textbf{Average Users} & \textbf{Average Items} & \textbf{Average Comments} \\ \hline
+ Train & 3930.55 & 1267.42 & 27275.09 \\ \hline
+ Test & 3910.33 & 461.07 & 10356.82 \\ \hline
 \end{tabular}
 \caption{Data Split}
 \label{tab:split}
 \end{table}
 
 The metric we use for evaluation is Mean Reciprocal Rank (MRR) which is %essentially 
-the average of the reciprocal rank of the first hit in the list of candidates. We compute RR for those instances in which the author is found in the top 100 ranked results. For the rest of the cases, we assume that the author was ranked at infinity, and these cases contribute a RR of zero to the MRR. We also make use of $A@N$ which represents the accuracy at or less than rank N, i.e., percent of comments in the entire set that were correctly classified at or less than rank N.
+the average of the reciprocal rank of the first hit in the list of candidates. We compute RR for those instances in which the author is found in the top 100 ranked results. For the rest of the cases, we assume that the author was ranked at infinity, and these cases contribute a RR of zero to the MRR. We also make use of $MAP@N$ which represents the mean average precision upto rank N.
 
 As a sanity check, we calculated a trivial baseline that drew a comment from the training set at random. In essence, the baseline prioritizes users who have made more comments. The baseline had an $MRR < 0.001$ in both cases of NU and SC.
 
 Table~\ref{tab:com_results} shows the results of classification averaged over all comments. 
-Overall NU is a more challenge use scenario than SC. 
-For the case of SC, $2$-grams perform best and $3$-grams slightly better than $2$-grams for the case of NU with $4$-grams performing the worst for both cases.
 
 \begin{table}[!h]
 \centering
-\begin{tabular}{|l|c|c|c|c|c|}
+\begin{tabular}{|l|c|c|c|c|}
 \hline
- \textbf{Dataset} & \textbf{n-gram} & \textbf{MRR} & \textbf{A@1} & \textbf{A@5} & \textbf{A@10}\\ \hline
- \multirow{3}{*}{SC} & \textbf{2} & \textbf{0.1176} & \textbf{8.94} & \textbf{14.43} & \textbf{17.18}\\ \cline{2-6}
- & 3 & 0.1090 & 8.51 & 13.25 & 15.53\\ \cline{2-6}
- & 4 & 0.1000 & 7.79 & 12.22 & 14.35\\ \hline
- \multirow{3}{*}{NU} & 2 & 0.0321 & 1.96 & 4.05 & 5.48\\ \cline{2-6}
- & \textbf{3} & \textbf{0.0341} & \textbf{2.23} & \textbf{4.32} & \textbf{5.59}\\ \cline{2-6}
- & 4 & 0.0254 & 1.71 & 3.16 & 4.12\\ \hline
+ \textbf{Distance Measure} & \textbf{n-gram} & \textbf{MRR} & \textbf{MAP@5} & \textbf{MAP@10}\\ \hline
+ \multirow{3}{*}{Euclidean}& 2 & & & \\ \cline{2-5}
+ & 3 & 0.0305 & 0.0141 & 0.0163 \\ \cline{2-5}
+ & 4 & & & \\ \hline
+ \multirow{3}{*}{Cosine} & 2 & &  & \\ \cline{2-5}
+ & 3 & 0.0711 & 0.0357 & 0.0412 \\ \cline{2-5}
+ & 4 & & & \\ \hline
 \end{tabular}
 \caption{Per-Comment Results}
 \label{tab:com_results}
 \end{table}
 
-We attribute the difference of performance between SC and NU to the temporal evolution of the vocabulary of NU. SC users consistently utilize more or less the same vocabulary over time whereas those of NU necessarily do not. NU comments could be expected to change vocabulary since NU is a news dataset, and news topics change over time. For instance, during the month of December, Christmas and New Year were popular topics and there were numerous usages of keywords related to these topics.
-%whereas during other months there were varying topics depending on what was trending. 
-SC on the other hand does not have these drastic changes, since people are commenting on music, for which, unlike news, the topics do not rapidly change or evolve over time.
+Clearly, the cosine similarity based prediction outperforms the euclidean distance based prediction. This may be due to the fact that cosine similarity outright ignores vectors which are entirely dissimilar whereas the euclidean distance measure does not. In the case of text, dissimilar vectors directly imply two pieces of text with entirely different words, this better suits our goal of trying to find similar comments.
 
-As for the particular performance of $n$-grams, we assume that $4$-grams performed worst because they were too specific. In the case of NU, there is only a marginal difference between $2$-grams and $3$-grams. For SC, $2$-grams performed best, explainable by the short length of SC comments, but also by the fact that they are
-%which may be attributed to the fact that the average SC comment has a very short length. 
- often filled with emoticons and punctuation, which are at most times shorter than lexical words.
+But, it is open to question whether authorship attribution utilizing cosine similarity for all domains would outperform euclidean distance. Narayanan et al. \cite{narayanan_feasibility_2012} had used Euclidean distance for the special case of blogs which are much larger than comments and also a different set of features.
 
-Figure~\ref{fig:sc_feat_mrr} and Figure~\ref{fig:nu_feat_mrr} further explore whether the number of $n$-grams in each comment affected the final MRR score. Specifically, we investigate whether the length of the comment affects the MRR. For the sake of observation, we divide the dataset into equally distributed 5\% quantiles based on the $n$-gram count and find the mean of all MRR scores within the bounds of these quantiles. A fit over the distribution is then made, and is referred to as the Quantile Bounded Mean ($QBM$).
+Considering the scale of results for our classification task wherein there were potentially around 4k different users to attribute to, we were able to make a prediction on average in the top 15 ranks. This implies that users of NU.nl more or less utilize the same words over time that makes them uniquely identifiable.
 
-We only look into the $n$-grams that performed best for SC and NU ($n$=2,3). We limited the graphs up till the $99^{th}$ quantile, since we assumed that going beyond that would take into consideration outliers that would not be very informative for our purposes. 
-%This next sentence, it is very nice that you say this, but conventionally people don't explicitly point it out. It confused me when I first read it, so I think it is better to leav it out.
-%It is also to be noted that we have scaled down the MRR to 0.4 for both graphs for better clarity.
+If one were to make use of conventional authorship features such as text compression, parts-of-speech, lexical features (frequency of punctuation, word length, sentence length), which capture subtle stylometric features rather than just the text, one might see an improvement over the base performance. But, use of such features is out of scope in this work. 
 
-\begin{figure}[!h]
-\centering
-\includegraphics[width=0.6\textwidth]{c-inv_images/sc_feat_mrr.png}
-\caption{MRR vs $2$-gram counts for SC}
-\label{fig:sc_feat_mrr}
-\end{figure}
+In the end we were still able to make decent predictions even without such advanced features and were able to assess that the average user of NU.nl utilizes the same vocabulary over time.
+
+->TODO INSERT RANK GRAPHS
+
+We also look into the stability of the predictions over different conditions so as to determine whether it is biased towards a particular nature of the dataset.
+
+All plots are essentially histograms averaged with respect to the particular X-axis metric. Due to the wide variations that would potentially occur due to the wide range in the actual number of instances in each bin, we utilize Quantile Bounded Mean (QBM) as an approximation towards the trend of the plot.
+
+To calculate the QBM approximation, we split our dataset that is binned with respect to the X-axis metric then split into 5\% quantiles. We then find the average over these quantiles resulting in a single data point for that quantile, connecting all such data points finally results in a smoothed approximation of the trend of the plot. We do not take into account the last quantile as it would contain potential outliers that are not characteristic of the entire dataset.
 
 \begin{figure}[!h]
 \centering
-\includegraphics[width=0.6\textwidth]{c-inv_images/nu_feat_mrr.png}
-\caption{MRR vs $3$-gram counts for NU}
-\label{fig:nu_feat_mrr}
+\includegraphics[width=0.75\textwidth]{c-inv_images/AuthorshipUserCountMRR.jpeg}
+\caption{MRR Predictions vs No. Training Comments}
+\label{fig:AuthorshipUserCountMRR}
 \end{figure}
 
-Interestingly, for the case of SC, the MRR peaks early on, and then slightly decreases before finally leveling off. A common behavior observed in SC was that different users often used the same vocabulary, for instance the exact same comment `nice' alone occurred 560 times in the dataset. This behavior explains the particularly low value in the case of shorter comments. 
-% This sentence doesn't make sense. If long comments promote content, and use the same words to do so, then the performance should go up. I would just leave it out.
-%The longer comments were often comprised of users promoting content or plain spam explaining the decrease and stagnation over time.
+Figure~\ref{fig:AuthorshipUserCountMRR} is a plot of the MRR predictions versus the number of training comments that were utilized. As can be seen most of the instances occurred from 3-5 training comments, there is a slight fall between 3 and 4 but it picks up after 4 and generally stabilizes from there on. It is also to be noted that there are no drastic changes towards the end implying that more comments do not immediately imply better predictions. This also yields insight into the least number of comments required to make predictions - in this case 4 seems to be a good least threshold.
 
-In the case of NU, the length of the comment is proportional to the MRR. Although there are wide variations towards longer comments overall the mean gradually increases.
+\begin{figure}[!h]
+\centering
+\includegraphics[width=0.75\textwidth]{c-inv_images/AuthorshipItemCountMRR.jpeg}
+\caption{MRR Predictions vs No. Unique Users who Commented}
+\label{fig:AuthorshipItemCountMRR}
+\end{figure}
 
-\subsection{Conclusion and Outlook}
-%I moved this to the beginning, because usually the conclusion comes before the outlook to future work.
-By use of a simple experimental setup, we were able to examine two similar, but at the heart very different, datasets. In spite of a large candidate author set and smaller document size, we were able to make correct predictions in about 15\% of the cases for SC. Our conclusion is that large scale attribution is to an extent domain dependent, and that it is possible with the right features.
+Figure~\ref{fig:AuthorshipItemCountMRR} is a plot of the MRR predictions versus the number of unique users who had commented on the item. This measure is essentially a surrogate of the popularity of the item - the more the unique users who commented the more popular the item is expected to be. There is a slight increase as the number of unique users increases - with a significant rise from 1 - 2 unique users and generally it stabilizes after 7 with slight increases towards the end. Yet again there are no drastic changes as observed previously.
 
-%Not spam filtering! You would have to show that spammer's behavior is not actually helping you in order to say that. It's feature selection, thaty ou mean. I changed it.
-We believe that if more sophisticated feature selection techniques were adopted, there would be additional improvement in performance. 
-Our experiments raise the question of how redundant comments such as `nice' can be characterized. 
-In our future work, we will address this question by investigating the introduction of the context of the item into the picture. 
-% I am suggesting to leave out the remarks about the co-commenters. Ultimately you are actually trying to predict commenter similarities (the intro now states this), so you don't want to put too much emphasis on this point here.
-%We hypothesize that comments aid in characterizing the item, therefore co-occurring comments could potentially act as a medium for attributing the target author's own comment. 
-Meta features such as the time of the day the target user frequently comments, or geo-graphic location of the commenter could also be helpful.
-%or the co-commenters the target user consistently comments beside with similar to that of a collaborative filtering scenario might also prove helpful.
 
-NU on the other hand is an entirely different situation altogether: there are not as many repeated $n$-grams. In addition, users are reacting to ever-changing topics, and it could be helpful to supplement $n$-grams with other features. If one were to make use of conventional authorship features such as text compression, parts-of-speech, lexical features (frequency of punctuation, word length, sentence length), which capture subtle stylometric features rather than just the text, one might see an improvement over the base performance. It is open to question whether the context of the item would be helpful considering the rapid change in topic contrary to SC. Since NU largely caters to an audience of a single region, the time- and location-based meta features might not be as helpful.
+\begin{figure}[!h]
+\centering
+\includegraphics[width=0.75\textwidth]{c-inv_images/AuthorshipUserNeighMRR.jpeg}
+\caption{MRR Predictions vs Neighbourhood Size of User}
+\label{fig:AuthorshipUserNeighMRR}
+\end{figure}
 
-In addition, we also evaluated the prediction by utilizing the id's of the co-commenters of the target user in the training set in contrast to utilizing only the target user's id as previously adopted. The results are presented in Table~\ref{tab:co_results}
+Figure~\ref{fig:AuthorshipUserNeighMRR} is a plot of the MRR predictions versus the user neighbourhood sizes. The user neighbourhood is simply computed by the sum of the unique users who co-commented along with the target user. The average neighbourhood size per user of the entire dataset was found to be 460.89 users. The MRR stabilizes after a neighbourhood size of ~30 implying that users who comment on items that are more often commented by other users are better attributed. But, similar to previous observations there are no drastic changes.
+
+We further investigate the co-commenter behaviour by utilizing the target user's neighbourhood users' labels as the ground truth rather than only the target user's label. We utilize cosine distance for our predictions as we had previously observed that cosine distance performed better. Table~\ref{tab:co_com_results} shows the results of the co-commenter classification.
 
 \begin{table}[!h]
 \centering
-\begin{tabular}{|l|c|c|}
+\begin{tabular}{|l|c|c|c|c|}
 \hline
- \textbf{Dataset} & \textbf{Classifier} & \textbf{MRR} \\ \hline
- \multirow{8}{*}{SC} 
- & Baseline & 0.0806 \\ \cline{2-3}
- & 2-gram kNN & 0.3259 \\ \cline{2-3}
- & 3-gram kNN & 0.3143 \\ \cline{2-3}
- & 4-gram kNN & 0.3046 \\ \cline{2-3}
- & 99\% Baseline & 0.0770 \\ \cline{2-3}
- & 99\% 2-gram kNN & 0.2741 \\ \cline{2-3}
- & 99\% 3-gram kNN & 0.2656 \\ \cline{2-3}
- & 99\% 4-gram kNN & 0.2551 \\ \hline
- \multirow{8}{*}{NU} 
- & Baseline & 0.5636 \\ \cline{2-3}
- & 2-gram kNN & 0.7953 \\ \cline{2-3}
- & 3-gram kNN & 0.7908 \\ \cline{2-3}
- & 4-gram kNN & 0.7783 \\ \cline{2-3}
- & 99\% Baseline & 0.5550 \\ \cline{2-3}
- & 99\% 2-gram kNN & 0.7048 \\ \cline{2-3}
- & 99\% 3-gram kNN & 0.7056 \\ \cline{2-3}
- & 99\% 4-gram kNN & 0.7017 \\ \hline
+ \textbf{(TODO ENTIRE DATASET) Predictor} & \textbf{n-gram} & \textbf{MRR} & \textbf{MAP@5} & \textbf{MAP@10}\\ \hline
+ \multirow{3}{*}{k-NN Cosine} & 2 & &  & \\ \cline{2-5}
+ & 3 & 0.3472 & &  \\ \cline{2-5}
+ & 4 & & & \\ \hline
+ \multirow{3}{*}{Random} & 2 & &  & \\ \cline{2-5}
+ & 3 & 0.2150 & &  \\ \cline{2-5}
+ & 4 & & & \\ \hline
 \end{tabular}
-\caption{Results Evaluated with Co-Commenter Labels as Ground Truth}
-\label{tab:co_results}
+\caption{Per-Comment Co-Commenter Results}
+\label{tab:co_com_results}
 \end{table}
 
-In both datasets, there were outlier co-commenters who made a very large number of comments  around 9k in the case of NU and  around 4k in the case of SC. This would lead to a free lunch scenario where every target user has this outlier user as a co-commenter. Therefore, we limit our co-commenter evaluation up till the $99^{th}$ percentile of number of comments in the dataset. Explicitly setting a threshold of <357 for SC and <944 for NU, these results are shown prepended with 99\%.
+A surprising observation was that random predictions perform close to that of our k-NN predictions. This is characteristic of the neighbourhood size - as we previously observed that the average neighbourhood size was 460.89 per user, considering this with the average number of users as seen in Table~\ref{tab:split}, in an ideal world scenario there would be ~9 clusters of users who comment on articles. Thereby it takes simply to find 1 of the 9 clusters to make a prediction.
 
-In addition, we also employ the previous baseline which made random predictions while prioritizing users who made higher number of comments. As can be seen, users of NU consistently co-comment with each other inferring from the random baseline. There is very slight difference between 2-gram and 3-gram features but overall this also gives insight that users who consistently co-comment make use of the same words. Our earlier observation was that a single user does not use of the same words over time but this leads us to believe that there is a predominant pattern among different users that leads them to co-comment and also make use of relatively the same words.
+As before, we investigate particular properties of the dataset and their influence on our predictions.
 
-SC on the otherhand does not have the same behaviour as NU, this indicates that the community of SC is more fragmented than that of NU as the baseline is inferior compared to that of NU. But, relativistic to the baseline 2-gram features perform better. But in comparison to the earlier single user results, there is no drastic change as observed in NU. One of the reasons might be that there is too much redundancy in the words used by the user that it makes very slight difference to evaluate with respect to the co-commenters.
+\begin{figure}[!h]
+\centering
+\begin{subfigure}[b]{0.475\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{c-inv_images/co_AuthorshipUserCountMRR.jpeg}
+    \caption{Cosine k-NN}
+\end{subfigure}
+\begin{subfigure}[b]{0.475\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{c-inv_images/randCo_AuthorshipUserCountMRR.jpeg}
+    \caption{Random}
+\end{subfigure}
+\caption{Co-Commenter MRR Predictions vs No. Training Comments}
+\label{fig:co_AuthorshipUserCountMRR}
+\end{figure}
+
+Figure~\ref{fig:co_AuthorshipUserCountMRR} is a plot of the co-commenter MRR predictions versus the number of training comments that were utilized. Both cosine k-NN and random predictions observe the same trend of gradual increase as the number of comments increases as increase in number of comments potentially increases the size of the ground truth labels under consideration.
+
+\begin{figure}[!h]
+\centering
+\begin{subfigure}[b]{0.475\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{c-inv_images/co_AuthorshipItemCountMRR.jpeg}
+    \caption{Cosine k-NN}
+\end{subfigure}
+\begin{subfigure}[b]{0.475\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{c-inv_images/randCo_AuthorshipItemCountMRR.jpeg}
+    \caption{Random}
+\end{subfigure}
+\caption{Co-Commenter MRR Predictions vs No. Unique Users who Commented}
+\label{fig:co_AuthorshipItemCountMRR}
+\end{figure}
+
+Figure~\ref{fig:co_AuthorshipItemCountMRR} is a plot of the MRR predictions versus the number of unique users who had commented on the item. Only earlier on, there is a slight rise and a subsequent fall whereas the rest is stabilized. This might be an indication that users with very large neighbourhood sizes comment on the least popular articles thereby causing a slight rise whereas the medium popular that ranges from ~7 are commented by the average user.
+
+\begin{figure}[!h]
+\centering
+\begin{subfigure}[b]{0.475\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{c-inv_images/co_AuthorshipUserNeighMRR.jpeg}
+    \caption{Cosine k-NN}
+\end{subfigure}
+\begin{subfigure}[b]{0.475\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{c-inv_images/randCo_AuthorshipUserNeighMRR.jpeg}
+    \caption{Random}
+\end{subfigure}
+\caption{Co-Commenter MRR Predictions vs Neighbourhood Size of User}
+\label{fig:co_AuthorshipUserNeighMRR}
+\end{figure}
+
+Figure~\ref{fig:AuthorshipUserNeighMRR} is a plot of the MRR predictions versus the user neighbourhood sizes. This without a doubt shows the anticipated that as the neighbourhood size increases, the number of ground truth labels increase and subsequently the MRR increases.
+
+\subsection{Inferences}
+In conclusion, we were able to make decent predictions for single label attribution even with simple features. For full fledged authorship attribution, one might employ the technique used here as a sampling strategy to narrow down a large number of authors to a candidate set that then later undergoes the entire process utilizing stylometric features for accurate prediction.
+
+The co-commenter prediction shows the innate nature of the dataset wherein it is largely clustered into groups of users who consistently co-comment on the same set of items. Thereby potentially showing that collaborative filtering could be a good predictor in finding the items the target user would comment on. In addition, the accuracy of the single label attribution also encourages us to model the user by his unique vocabulary thereby use that as an indication of the user and not necessarily utilize the user's explicit label/id.

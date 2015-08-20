@@ -14,8 +14,14 @@
 \usepackage{multirow}
 \usepackage{caption}
 \usepackage{subcaption}
+\usepackage{xcolor}
 % 3)
 
+\newcommand{\cfbox}[2]{%
+    \colorlet{currentcolor}{.}%
+    {\color{#1}%
+    \fbox{\color{currentcolor}#2}}%
+}
 
 \begin{document}
 
@@ -53,7 +59,8 @@
 %% Use letters for the chapter numbers of the appendices.
 %\appendix
 
-%\input{appendix-a}
+\appendix
+\input{appendix}
 
 \bibliography{report}
 

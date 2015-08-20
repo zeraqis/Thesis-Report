@@ -1,3 +1,22 @@
 \chapter{Dataset}
-
+\label{chap:data}
 The dataset under observation is NU.nl, a popular Dutch online news website that comprises of predominantly Dutch comments scraped from their commenting platform NUjij.nl and spans over the year of 2014. An article is initially published on the original NU.nl site by editors, this is then shared by users and thereby receives comments through NUjij.nl.
+
+Figures~\ref{fig:nu_1}, \ref{fig:nu_2} and \ref{fig:nu_3} in the Appendix show the layout and interface of NU.nl and NUjij.nl. There are mainly two consistent recommenders in place,
+
+\begin{enumerate}
+\item Freshness - The most recent articles are recommended to read/comment.
+\item Popularity - The most clicked articles are recommended to read/comment.
+\end{enumerate}
+
+There are also editor curated lists displayed on the homepage periodically. These feature articles would be the focal point to receive feedback but this type of recommendation is unfortunately not captured by our dataset and hence out of scope in this work. It also goes without saying that the user might have discovered the article himself or through an external social media platform. It is these deviant behaviours that are characteristic of personalized behaviour and that is what we wish to capture for learning in our recommender.
+
+To summarize, NU.nl or NUjij.nl do not have any form of personalized recommender in place that utilizes user preferences and hence the dataset would also be biased to reflect these generic freshness/popularity based recommenders. This answers our question of:
+
+\begin{center}
+\cfbox{blue}{\itshape \textbf{Does freshness/trend matter?}}
+\end{center}
+
+With respect to this dataset, freshness/trend does matter. One could also say that news in general must be reported fresh whereas the aspect of trend is debatable. We present a few statistics related to the dataset in the following sections.
+
+(TODO - Insert all graphs) \ldots
